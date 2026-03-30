@@ -1,0 +1,1301 @@
+@import "tailwindcss";
+
+/* ---- Design tokens ---- */
+:root {
+  --c-bg-start:  #0e0802;
+  --c-bg-end:    #1c1006;
+  --c-gold:      #C9A227;
+  --c-gold-dim:  #8B6914;
+  --c-gold-glow: rgba(201, 162, 39, 0.35);
+  --c-text:      #f0e4c8;
+  --c-text-dim:  #8a7660;
+  --c-surface:   #1a1208;
+  --c-border:    rgba(255, 200, 80, 0.22);
+}
+
+/* ---- Grain texture overlay ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23grain)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ---- Keyframes ---- */
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(1); }
+  50%       { opacity: 0.95; transform: scale(1.6); }
+}
+
+@keyframes title-pulse {
+  0%, 100% {
+    text-shadow:
+      3px 3px 0 #000,
+      0 0 18px var(--c-gold),
+      0 0 40px var(--c-gold-dim);
+  }
+  50% {
+    text-shadow:
+      3px 3px 0 #000,
+      0 0 28px var(--c-gold),
+      0 0 70px var(--c-gold-dim),
+      0 0 110px rgba(201, 162, 39, 0.22);
+  }
+}
+
+@keyframes sen-sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50%       { transform: rotate(2.5deg); }
+}
+
+/* ---- Accessibility utilities ---- */
+
+/* Skip-to-content + screen-reader-only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Visible focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--c-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---- Star field ---- */
+
+.star-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation-name: twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+/* ---- Title screen ---- */
+
+.game-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: clamp(2.6rem, 9vw, 4.6rem);
+  letter-spacing: 0.07em;
+  line-height: 1.05;
+  color: var(--c-gold);
+  animation: title-pulse 3s ease-in-out infinite;
+}
+
+/* Responsive senator size on title screen */
+.title-senator {
+  width: min(230px, 58vw);
+}
+
+.sen-sway {
+  animation: sen-sway 3.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+/* ---- Difficulty toggles ---- */
+
+.diff-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-dim);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.diff-btn:hover:not(.diff-btn--active) {
+  border-color: rgba(255, 215, 0, 0.45);
+  background: #211810;
+}
+
+.diff-btn--active {
+  border-color: var(--c-gold);
+  background: #2a1e0c;
+  color: var(--c-text);
+}
+
+.diff-btn__label {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  color: var(--c-text-dim);
+  transition: color 0.2s ease;
+}
+
+.diff-btn--active .diff-btn__label {
+  color: var(--c-gold);
+}
+
+.diff-btn__desc {
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+/* ---- Start button ---- */
+
+.start-btn {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.9rem;
+  letter-spacing: 0.1em;
+  color: #0a0a1a;
+  background: var(--c-gold);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 52px;
+  cursor: pointer;
+  box-shadow: 0 4px 28px var(--c-gold-glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.start-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 40px rgba(255, 215, 0, 0.55);
+}
+
+.start-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 16px var(--c-gold-glow);
+}
+
+/* ==========================================================================
+   GAME SCREEN
+   ========================================================================== */
+
+/* ---- Layout ---- */
+
+.game-screen--skippable { cursor: pointer; }
+
+.dc-skyline-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.game-screen {
+  position: relative;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: #040201;
+  color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  padding: 8px max(16px, calc(50% - 240px)) 12px;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+.round-progress  { margin-top: 4px; }
+.meters          { margin-top: 8px; }
+.senator-center  { margin-top: 10px; }
+.scenario-card   { margin-top: 8px; }
+.options         { margin-top: 8px; }
+
+@media (max-width: 400px) {
+  .game-screen    { padding: 6px 12px 10px; }
+  .senator-center { width: 160px; }
+  .scenario-title { font-size: 1.2rem; }
+  .hud-round      { font-size: 0.88rem; }
+  .hud-cash       { font-size: 0.95rem; }
+  .option-btn     { padding: 8px 10px; gap: 10px; }
+  .option-badge   { width: 26px; height: 26px; }
+  .option-text    { font-size: 0.82rem; }
+  .meters         { margin-top: 6px; }
+  .senator-center { margin-top: 8px; }
+  .scenario-card  { margin-top: 6px; }
+  .options        { margin-top: 6px; }
+}
+
+/* ---- HUD top bar ---- */
+
+.hud-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.18);
+  flex-shrink: 0;
+}
+
+.hud-round {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.1rem;
+  letter-spacing: 0.07em;
+  color: var(--c-text);
+}
+
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;   /* allow children to shrink */
+}
+
+.hud-gold-bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;  /* clip excess pips rather than overflow HUD */
+}
+
+/* cash and mute never shrink off screen */
+.hud-cash { flex-shrink: 0; }
+.mute-btn  { flex-shrink: 0; }
+
+/* ---- Falling gold bar stack (bottom-right) ---- */
+
+@keyframes bar-fall {
+  0%   { transform: translateY(-100vh) rotate(-10deg); opacity: 0.8; }
+  65%  { transform: translateY(0)      rotate(0deg);   opacity: 1;   }
+  78%  { transform: translateY(-12px); }
+  90%  { transform: translateY(4px); }
+  100% { transform: translateY(0); }
+}
+
+.gold-bar-brick {
+  position: fixed;
+  right: 12px;
+  width: 62px;
+  height: 20px;
+  background: linear-gradient(to bottom, #F5D020, #C8960C);
+  border: 1.5px solid #8B6914;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bangers', Impact, cursive;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: #5a3a06;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.gold-bar-brick--falling {
+  animation: bar-fall 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ---- HUD gold bar pips ---- */
+
+.gold-bar-pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 12px;
+  background: var(--c-gold);
+  color: #0a0a1a;
+  font-size: 0.45rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  border-radius: 2px;
+  border: 1px solid var(--c-gold-dim);
+}
+
+.hud-cash {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--c-gold);
+}
+
+/* ---- Meters ---- */
+
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  background: #1a1208;
+  border: 1px solid rgba(201, 162, 39, 0.22);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meter__label {
+  width: 36px;
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  color: var(--c-text);
+  flex-shrink: 0;
+}
+
+.meter__track {
+  flex: 1;
+  height: 9px;
+  background: #1e1510;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  /* Full-width element scaled on the X axis from the left — avoids layout
+     reflow that `width` transitions trigger. GPU-composited. */
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  transform-origin: left center;
+  transition: transform 0.55s ease;
+  will-change: transform;
+}
+
+.meter-fill--red    { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+.meter-fill--purple { background: linear-gradient(90deg, #6d28d9, #a855f7); }
+
+.meter-fill--red.meter-fill--glow {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 22px rgba(239, 68, 68, 0.35);
+}
+.meter-fill--purple.meter-fill--glow {
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 22px rgba(168, 85, 247, 0.35);
+}
+
+.meter__value {
+  width: 50px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--c-text-dim);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+@keyframes streak-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.75; transform: scale(1.04); }
+}
+
+.streak-badge {
+  font-size: 0.82rem;
+  color: var(--c-gold);
+  text-align: center;
+  animation: streak-pulse 1.6s ease-in-out infinite;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+
+/* ---- Senator ---- */
+
+.senator-center {
+  width: 200px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* ---- Scenario card ---- */
+
+@keyframes scenario-enter {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.scenario-enter {
+  animation: scenario-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.scenario-card {
+  position: relative;
+  background: #1a1208;
+  border: 1px solid rgba(201, 162, 39, 0.22);
+  border-left: 3px solid var(--c-gold-dim);
+  border-radius: 10px;
+  padding: 10px 14px 10px 16px;
+  flex-grow: 1;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: -55px;
+}
+
+.scenario-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: var(--c-gold);
+  margin: 0 0 6px;
+  line-height: 1.15;
+}
+
+.scenario-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--c-text);
+  margin: 0;
+}
+
+/* ---- Flavor toast ---- */
+
+@keyframes toast-in {
+  from { opacity: 0; transform: scale(0.95) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.flavor-toast {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 16px 12px;
+  border-top: 1.5px solid rgba(255, 215, 0, 0.40);
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(to bottom, transparent, #221a0a 28px);
+  animation: toast-in 0.24s ease-out both;
+}
+
+.flavor-toast p {
+  margin: 0;
+  font-style: italic;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--c-text);
+}
+
+/* ---- Option buttons ---- */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(201, 162, 39, 0.25);
+  background: #1a1208;
+  color: var(--c-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.14s, background 0.14s, opacity 0.22s;
+}
+
+.option-btn:hover:not(:disabled):not(.option-btn--faded) {
+  border-color: rgba(201, 162, 39, 0.50);
+  background: #221a0c;
+}
+
+.option-btn--selected {
+  border-color: var(--c-gold);
+  background: #2a1e0c;
+}
+
+.option-btn--faded { opacity: 0.35; }
+.option-btn:disabled { cursor: default; }
+
+.option-badge {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: #251c10;
+  border: 1px solid rgba(201, 162, 39, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 1.0rem;
+  letter-spacing: 0.04em;
+  color: var(--c-text-dim);
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+
+.option-btn--selected .option-badge {
+  background: rgba(255, 215, 0, 0.18);
+  border-color: var(--c-gold);
+  color: var(--c-gold);
+}
+
+.option-text {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* ---- Mute toggle ---- */
+
+.mute-btn {
+  background: #1a1208;
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 6px;
+  transition: opacity 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.mute-btn:hover {
+  opacity: 0.7;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* ==========================================================================
+   EVIDENCE SLIDESHOW
+   ========================================================================== */
+
+.slideshow-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.slideshow-wrap {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.45s ease;
+}
+.ss-on  { opacity: 1; }
+.ss-off { opacity: 0; }
+
+.slideshow-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(55%) contrast(1.08) brightness(0.85);
+  will-change: transform;
+}
+
+/* Ken Burns variants — image grows toward a different corner each slide */
+@keyframes kb-1 {
+  from { transform: scale(1.0); }
+  to   { transform: scale(1.15); }
+}
+@keyframes kb-2 {
+  from { transform: scale(1.0)  translate(0,    0);    }
+  to   { transform: scale(1.13) translate(-3%, -2%);   }
+}
+@keyframes kb-3 {
+  from { transform: scale(1.0)  translate(0,    0);    }
+  to   { transform: scale(1.14) translate(3%,   1.5%); }
+}
+@keyframes kb-4 {
+  from { transform: scale(1.05) translate(-2%,  1%);   }
+  to   { transform: scale(1.17) translate(2%,  -1%);   }
+}
+.kb-1 { animation: kb-1 3.8s ease-out both; }
+.kb-2 { animation: kb-2 3.8s ease-out both; }
+.kb-3 { animation: kb-3 3.8s ease-out both; }
+.kb-4 { animation: kb-4 3.8s ease-out both; }
+
+/* Vignette overlay */
+.slideshow-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.72) 100%);
+  pointer-events: none;
+}
+
+/* Exhibit label — dossier stamp style */
+.exhibit-label {
+  position: absolute;
+  bottom: 68px;
+  left: 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #e8d5a3;
+  border: 1.5px solid rgba(232, 213, 163, 0.65);
+  padding: 5px 10px 4px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  max-width: calc(100vw - 90px);
+}
+
+.slide-counter {
+  position: absolute;
+  bottom: 68px;
+  right: 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  color: rgba(232, 213, 163, 0.5);
+  letter-spacing: 0.1em;
+}
+
+/* Skip button */
+.ss-skip-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  padding: 6px 11px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 10;
+}
+.ss-skip-btn:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+/* ==========================================================================
+   PRISON SCREEN
+   ========================================================================== */
+
+.prison-screen {
+  min-height: 100svh;
+  width: 100%;
+  background: linear-gradient(to bottom, #070401, #120a03);
+  color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px max(16px, calc(50% - 240px)) 36px;
+  gap: 18px;
+  box-sizing: border-box;
+}
+
+@keyframes prison-title-in {
+  from { opacity: 0; letter-spacing: 0.5em; }
+  to   { opacity: 1; letter-spacing: 0.12em; }
+}
+
+.prison-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: clamp(2rem, 8vw, 3rem);
+  letter-spacing: 0.12em;
+  color: #ef4444;
+  text-shadow: 0 0 22px rgba(239, 68, 68, 0.45), 2px 2px 0 #000;
+  margin: 0;
+  animation: prison-title-in 0.5s ease-out both;
+}
+
+/* Senator + bars wrapper */
+.prison-senator-outer {
+  position: relative;
+  width: 200px;
+}
+
+.prison-senator-clip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;  /* clips bars above top edge during drop */
+}
+
+/* Bars drop animation */
+@keyframes bars-fall {
+  0%   { transform: translateY(-105%); }
+  62%  { transform: translateY(5%);    }
+  80%  { transform: translateY(-2%);   }
+  100% { transform: translateY(0);     }
+}
+
+.prison-bars-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: bars-fall 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+  will-change: transform;
+}
+
+/* GUILTY stamp */
+@keyframes guilty-stamp {
+  0%   { transform: translate(-50%, -50%) rotate(-20deg) scale(0.35); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) rotate(-13deg) scale(1.08); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(-15deg) scale(1);    opacity: 1; }
+}
+
+.guilty-stamp {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  /* base transform set by animation; starts hidden */
+  transform: translate(-50%, -50%) rotate(-15deg);
+  opacity: 0;
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 2.6rem;
+  letter-spacing: 0.1em;
+  color: #dc2626;
+  border: 4px solid #dc2626;
+  padding: 3px 12px 1px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: guilty-stamp 0.45s ease-out 1.15s both;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+/* Dossier stats card */
+.prison-dossier {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.76rem;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.dossier-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  letter-spacing: 0.06em;
+  color: var(--c-text-dim);
+}
+.dossier-row span:last-child {
+  color: var(--c-text);
+  font-weight: 700;
+}
+
+.dossier-last-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 9px;
+  color: var(--c-text-dim);
+  letter-spacing: 0.06em;
+}
+.dossier-last-choice em {
+  color: var(--c-text);
+  font-style: italic;
+  line-height: 1.45;
+  font-size: 0.79rem;
+}
+
+.dossier-sentence {
+  border-top: 1px solid rgba(239, 68, 68, 0.28);
+  padding-top: 10px;
+  text-align: center;
+  color: #ef4444;
+  letter-spacing: 0.13em;
+  font-size: 0.85rem;
+}
+.dossier-sentence strong {
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+}
+
+/* ==========================================================================
+   1. SCREEN FADE-IN — universal entrance for every screen
+   ========================================================================== */
+
+@keyframes screen-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.game-screen,
+.prison-screen,
+.win-big-screen,
+.win-small-screen,
+.fara-screen,
+.slideshow-screen {
+  animation: screen-enter 0.35s ease both;
+}
+
+/* ==========================================================================
+   2. OPTION BUTTON PRESS + SELECT FLASH
+   ========================================================================== */
+
+.option-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.08);
+  transition: transform 0.08s ease, background 0.08s ease;
+}
+
+@keyframes option-select-flash {
+  0%   { background: rgba(255, 215, 0, 0.22); }
+  100% { background: rgba(255, 215, 0, 0.09); }
+}
+
+.option-btn--selected {
+  animation: option-select-flash 0.3s ease both;
+}
+
+/* ==========================================================================
+   3. ROUND PROGRESS BAR
+   ========================================================================== */
+
+.round-progress {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.round-progress__fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--c-gold-dim), var(--c-gold));
+  transition: transform 0.55s ease;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   4. CASH METER (GREEN)
+   ========================================================================== */
+
+.meter-fill--green { background: linear-gradient(90deg, #166534, #4ade80); }
+
+.meter-fill--green.meter-fill--glow {
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.8), 0 0 22px rgba(74, 222, 128, 0.35);
+}
+
+/* ==========================================================================
+   5. FBI DANGER VIGNETTE
+   ========================================================================== */
+
+@keyframes danger-pulse {
+  0%, 100% { opacity: 0; }
+  50%       { opacity: 1; }
+}
+
+/* Pulsing red vignette on screen edges when FBI ≥ 75 */
+.game-screen--danger::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(185, 28, 28, 0.28) 100%);
+  animation: danger-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* All direct children float above the vignette and scanlines */
+.game-screen > * { position: relative; z-index: 1; }
+
+/* Skyline background stays behind all UI */
+.game-screen > .dc-skyline-bg { position: absolute; z-index: 0; }
+
+/* Senator floats above meters so the gold bar falls in front of the status box */
+.game-screen > .senator-center { z-index: 2; }
+
+/* Scenario card stays above the senator so it still covers the feet */
+.game-screen > .scenario-card { z-index: 3; }
+
+/* Gold bar bricks must stay fixed to the viewport, above all overlays */
+.game-screen > .gold-bar-brick { position: fixed; z-index: 10000; }
+
+/* ==========================================================================
+   6. SCANLINE TEXTURE
+   ========================================================================== */
+
+.game-screen::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ==========================================================================
+   7. CONFETTI (WinBigScreen)
+   ========================================================================== */
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-field {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Content floats above confetti */
+.win-big-screen > *:not(.confetti-field) { position: relative; z-index: 1; }
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall linear both;
+}
+
+/* ==========================================================================
+   9. GRADE STAMP VARIANTS (S = explosive, D = deflated)
+   ========================================================================== */
+
+@keyframes grade-stamp-s {
+  0%   { transform: translate(30%, -20%) rotate(12deg)  scale(0.1); opacity: 0; }
+  55%  { transform: translate(30%, -20%) rotate(-10deg) scale(1.3); opacity: 1; }
+  75%  { transform: translate(30%, -20%) rotate(6deg)   scale(0.9); opacity: 1; }
+  90%  { transform: translate(30%, -20%) rotate(9deg)   scale(1.05); opacity: 1; }
+  100% { transform: translate(30%, -20%) rotate(8deg)   scale(1);   opacity: 1; }
+}
+
+@keyframes grade-stamp-d {
+  0%   { transform: translate(30%, -20%) rotate(8deg) scale(0.4); opacity: 0; }
+  60%  { transform: translate(30%, -20%) rotate(5deg) scale(1.0); opacity: 1; }
+  100% { transform: translate(30%, -20%) rotate(3deg) scale(1);   opacity: 0.6; }
+}
+
+/* Override animation-name for S and D; A/B/C keep the default grade-stamp-in */
+.grade-stamp--s { animation-name: grade-stamp-s; animation-duration: 0.65s; }
+.grade-stamp--d { animation-name: grade-stamp-d; animation-duration: 0.70s; }
+
+/* ==========================================================================
+   WIN / FARA END SCREENS — shared layout
+   ========================================================================== */
+
+/* Shared senator+grade wrapper */
+.win-senator-wrap {
+  position: relative;
+  width: 200px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Grade stamp — positioned top-right over senator */
+@keyframes grade-stamp-in {
+  0%   { transform: translate(30%, -20%) rotate(12deg) scale(0.2); opacity: 0; }
+  65%  { transform: translate(30%, -20%) rotate(-6deg) scale(1.1); opacity: 1; }
+  100% { transform: translate(30%, -20%) rotate(8deg)  scale(1);   opacity: 1; }
+}
+
+.grade-stamp {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  transform: translate(30%, -20%) rotate(8deg);
+  opacity: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+  animation: grade-stamp-in 0.5s ease-out 0.4s both;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.grade-stamp--prison {
+  top: 80px;
+  right: -8px;
+}
+
+.grade-stamp--s { color: var(--c-gold);  background: rgba(255,215,0,0.12); }
+.grade-stamp--a { color: #c0c0c0;        background: rgba(192,192,192,0.12); }
+.grade-stamp--b { color: #4ade80;        background: rgba(74,222,128,0.10); }
+.grade-stamp--c { color: #fb923c;        background: rgba(251,146,60,0.10); }
+.grade-stamp--d { color: #f87171;        background: rgba(248,113,113,0.10); }
+
+.grade-subtext {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+  text-align: center;
+  margin: 0;
+}
+
+/* Shared dossier for win screens — same base as prison-dossier */
+.win-dossier {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.76rem;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+/* ==========================================================================
+   WIN BIG SCREEN
+   ========================================================================== */
+
+.win-big-screen {
+  min-height: 100svh;
+  width: 100%;
+  background: linear-gradient(to bottom, #0e0802, #1c1006, #0e0802);
+  color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px max(16px, calc(50% - 240px)) 36px;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+@keyframes win-big-title-in {
+  from { opacity: 0; letter-spacing: 0.6em; }
+  to   { opacity: 1; letter-spacing: 0.14em; }
+}
+
+.win-big-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  letter-spacing: 0.14em;
+  color: var(--c-gold);
+  text-shadow:
+    0 0 22px var(--c-gold-glow),
+    0 0 50px rgba(255,215,0,0.25),
+    2px 2px 0 #000;
+  margin: 0;
+  animation: win-big-title-in 0.55s ease-out both;
+}
+
+.win-big-sub {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+  margin: 0;
+}
+
+/* ==========================================================================
+   WIN SMALL SCREEN
+   ========================================================================== */
+
+.win-small-screen {
+  min-height: 100svh;
+  width: 100%;
+  background: linear-gradient(to bottom, #0b0804, #171008);
+  color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px max(16px, calc(50% - 240px)) 36px;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.win-small-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: clamp(1.8rem, 7.5vw, 2.8rem);
+  letter-spacing: 0.1em;
+  color: var(--c-text-dim);
+  margin: 0;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.win-small-sub {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   FARA SCREEN
+   ========================================================================== */
+
+.fara-screen {
+  min-height: 100svh;
+  width: 100%;
+  background: linear-gradient(to bottom, #0a0014, #180028, #0a0014);
+  color: var(--c-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px max(16px, calc(50% - 240px)) 36px;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+@keyframes fara-title-in {
+  from { opacity: 0; letter-spacing: 0.5em; }
+  to   { opacity: 1; letter-spacing: 0.11em; }
+}
+
+.fara-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: clamp(1.6rem, 6.5vw, 2.6rem);
+  letter-spacing: 0.11em;
+  color: #c084fc;
+  text-shadow: 0 0 22px rgba(192,132,252,0.5), 2px 2px 0 #000;
+  margin: 0;
+  text-align: center;
+  animation: fara-title-in 0.5s ease-out both;
+}
+
+.fara-charge {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(192,132,252,0.6);
+  margin: 0;
+  text-align: center;
+}
+
+.fara-dossier {
+  border-color: rgba(192,132,252,0.18);
+}
+
+.fara-dossier-row--highlight span:last-child {
+  color: #c084fc !important;
+}
+
+.fara-sentence {
+  border-top-color: rgba(192,132,252,0.28) !important;
+  color: #c084fc !important;
+}
+
+/* ==========================================================================
+   DECISION LOG
+   ========================================================================== */
+
+.decision-log {
+  width: 100%;
+  max-width: 360px;
+}
+
+.decision-log__toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.decision-log__toggle:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.decision-log__chevron {
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.decision-log__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.decision-log__entry {
+  display: flex;
+  gap: 10px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 7px;
+}
+
+.dlog-round {
+  flex-shrink: 0;
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--c-gold-dim);
+  width: 22px;
+  padding-top: 1px;
+}
+
+.dlog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dlog-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+}
+
+.dlog-choice {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--c-text);
+}
+
+.dlog-flavor {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--c-text-dim);
+  font-style: italic;
+}
