@@ -488,7 +488,7 @@ body::before {
   padding: 10px 14px 10px 16px;
   flex-grow: 1;
   min-height: 80px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-top: max(-55px, -8vh);
   display: flex;
   flex-direction: column;
