@@ -232,13 +232,15 @@ export default function GameScreen({
 
       {/* ---- Scenario card — key=round triggers slide-in animation each round ---- */}
       <section key={round} className="scenario-card scenario-enter" aria-label={`Round ${round} scenario`}>
-        <h2 className="scenario-title">{scenario.title}</h2>
-        <p className="scenario-desc">{scenario.description}</p>
-
-        {flavor && (
-          <div key={flavor} className="flavor-toast" aria-hidden="true">
+        {flavor ? (
+          <div key={flavor} className="flavor-fill" aria-hidden="true">
             <p>{flavor}</p>
           </div>
+        ) : (
+          <>
+            <h2 className="scenario-title">{scenario.title}</h2>
+            <p className="scenario-desc">{scenario.description}</p>
+          </>
         )}
       </section>
 

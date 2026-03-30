@@ -439,6 +439,9 @@ body::before {
   min-height: 0;
   overflow: hidden;
   margin-top: -55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .scenario-title {
@@ -457,31 +460,28 @@ body::before {
   margin: 0;
 }
 
-/* ---- Flavor toast ---- */
+/* ---- Flavor fill ---- */
 
 @keyframes toast-in {
-  from { opacity: 0; transform: scale(0.95) translateY(6px); }
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
-.flavor-toast {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 28px 16px 12px;
-  border-top: 1.5px solid rgba(255, 215, 0, 0.40);
-  border-radius: 0 0 10px 10px;
-  background: linear-gradient(to bottom, transparent, #221a0a 28px);
+.flavor-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   animation: toast-in 0.24s ease-out both;
 }
 
-.flavor-toast p {
+.flavor-fill p {
   margin: 0;
   font-style: italic;
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.6;
   color: var(--c-text);
+  text-align: center;
 }
 
 /* ---- Option buttons ---- */
