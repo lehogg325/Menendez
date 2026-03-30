@@ -284,28 +284,6 @@ body::before {
   .gold-bar-brick { width: 52px; height: 16px; font-size: 0.52rem; }
 }
 
-/* ---- Desktop: short window (height ≤780px, width >480px) ---- */
-@media (max-height: 780px) and (min-width: 481px) {
-  .senator-center { width: 160px; margin-top: 6px; }
-  .meters         { margin-top: 5px; }
-  .scenario-card  { margin-top: 5px; }
-  .options        { margin-top: 5px; gap: 4px; }
-  .option-btn     { padding: 8px 14px; }
-}
-
-/* ---- Desktop: very short window (height ≤640px, width >480px) ---- */
-@media (max-height: 640px) and (min-width: 481px) {
-  .senator-center { width: 130px; margin-top: 4px; }
-  .meters         { margin-top: 3px; }
-  .scenario-card  { margin-top: 3px; }
-  .options        { margin-top: 3px; gap: 3px; }
-  .option-btn     { padding: 6px 14px; }
-  .scenario-title { font-size: 1.2rem; }
-  .scenario-desc  { font-size: 0.86rem; }
-  .hud-top        { padding: 2px 0 4px; }
-  .meters         { padding: 5px 12px; }
-}
-
 /* ---- HUD top bar ---- */
 
 .hud-top {
