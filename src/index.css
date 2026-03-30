@@ -226,7 +226,7 @@ body::before {
   /* Spacing */
   .round-progress { margin-top: 3px; }
   .meters         { margin-top: 6px; padding: 6px 10px; gap: 4px; }
-  .senator-center { width: 70px; margin-top: 4px; }
+  .senator-center { width: 70px; height: 56px; overflow: hidden; margin-top: 4px; }
   .scenario-card  { margin-top: 4px; padding: 8px 12px 8px 14px; }
   .options        { margin-top: 6px; gap: 4px; flex-shrink: 0; }
 
@@ -279,7 +279,7 @@ body::before {
 
 /* ---- Mobile: short / landscape phones (height ≤700px + width ≤480px) ---- */
 @media (max-height: 700px) and (max-width: 480px) {
-  .senator-center { width: 60px; margin-top: 2px; }
+  .senator-center { width: 60px; height: 48px; overflow: hidden; margin-top: 2px; }
   .meters         { margin-top: 4px; }
   .scenario-card  { margin-top: 4px; }
   .options        { margin-top: 4px; gap: 3px; flex-shrink: 0; }
