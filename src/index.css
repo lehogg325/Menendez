@@ -234,6 +234,8 @@ body::before {
   .hud-top        { padding: 2px 0 6px; }
   .hud-round      { font-size: 0.9rem; }
   .hud-cash       { font-size: 1.0rem; }
+  .hud-gold-bars  { gap: 1px; }
+  .gold-bar-pip   { width: 15px; height: 9px; font-size: 0.48rem; }
 
   /* Meters */
   .meter__label   { width: 30px; font-size: 0.8rem; }
@@ -489,7 +491,7 @@ body::before {
   flex-grow: 1;
   min-height: 80px;
   overflow-y: auto;
-  margin-top: max(-55px, -8vh);
+  margin-top: max(-40px, -6vh);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

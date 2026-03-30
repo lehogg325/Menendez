@@ -59,6 +59,7 @@ function gameReducer(state: GameState, action: Action): GameState {
     case 'CHOOSE': {
       const { option } = action
       const scenario = scenarios[state.round - 1]
+      if (!scenario) return { ...state, screen: 'lose' }
 
       // Apply difficulty multiplier to FBI delta only
       const fbiDelta =
@@ -105,10 +106,10 @@ function gameReducer(state: GameState, action: Action): GameState {
       if (state.round === 20) {
         const dollars = cashToDollars(newCash)
         let endScreen: Screen
-        if (newForeign >= FARA_FOREIGN_THRESHOLD) {
-          endScreen = 'winFARA'
-        } else if (dollars >= BIG_WIN_CASH_DOLLARS) {
+        if (dollars >= BIG_WIN_CASH_DOLLARS) {
           endScreen = 'winBig'
+        } else if (newForeign >= FARA_FOREIGN_THRESHOLD) {
+          endScreen = 'winFARA'
         } else {
           endScreen = 'winSmall'
         }
@@ -157,6 +158,7 @@ export function useGameState(): GameStateHook {
   const currentScenario = useMemo(() => {
     if (state.screen !== 'game') return null
     const scenario = scenarios[state.round - 1]
+    if (!scenario) return null
     const shuffled = [...scenario.options].sort(() => Math.random() - 0.5)
     return { ...scenario, options: shuffled }
   }, [state.round, state.screen])

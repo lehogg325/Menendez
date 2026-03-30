@@ -16,8 +16,6 @@ interface SenatorProps {
 // Sub-renderers
 // ---------------------------------------------------------------------------
 
-// Face photo overlays handle all expressions — Eyes component no longer needed but kept for extensibility
-function Eyes(_: { expression: Expression }) { return null }
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -133,9 +131,6 @@ const Senator: FC<SenatorProps> = ({
             <circle key={i} cx={sx} cy={sy} r="0.8" fill="white" />
           ))}
         </g>
-
-        {/* === EYES — overlay for non-neutral expressions === */}
-        <Eyes expression={expression} />
 
         {/* === SWEAT DROPS === */}
         {expression === 'sweat' && (
