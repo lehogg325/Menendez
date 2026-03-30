@@ -218,19 +218,70 @@ body::before {
 .scenario-card   { margin-top: 8px; }
 .options         { margin-top: 8px; }
 
-@media (max-width: 400px) {
-  .game-screen    { padding: 6px 12px 10px; }
-  .senator-center { width: 160px; }
+/* ---- Mobile: standard phones (≤480px) ---- */
+@media (max-width: 480px) {
+  /* Layout */
+  .game-screen    { padding: 6px 10px 10px; }
+
+  /* Spacing */
+  .round-progress { margin-top: 3px; }
+  .meters         { margin-top: 6px; padding: 6px 10px; gap: 4px; }
+  .senator-center { width: min(180px, 44vw); margin-top: 6px; }
+  .scenario-card  { margin-top: 6px; padding: 8px 12px 8px 14px; }
+  .options        { margin-top: 6px; gap: 4px; }
+
+  /* HUD */
+  .hud-top        { padding: 2px 0 6px; }
+  .hud-round      { font-size: 0.9rem; }
+  .hud-cash       { font-size: 1.0rem; }
+
+  /* Meters */
+  .meter__label   { width: 30px; font-size: 0.8rem; }
+  .meter__value   { width: 44px; font-size: 0.78rem; }
+  .meter__track   { height: 8px; }
+
+  /* Scenario */
   .scenario-title { font-size: 1.2rem; }
-  .hud-round      { font-size: 0.88rem; }
-  .hud-cash       { font-size: 0.95rem; }
-  .option-btn     { padding: 8px 10px; gap: 10px; }
-  .option-badge   { width: 26px; height: 26px; }
+  .scenario-desc  { font-size: 0.86rem; line-height: 1.5; }
+
+  /* Options — 44px min touch target */
+  .option-btn     { gap: 10px; padding: 11px 12px; min-height: 44px; }
+  .option-badge   { width: 28px; height: 28px; }
+  .option-text    { font-size: 0.88rem; }
+
+  /* Mute button — 44px min touch target */
+  .mute-btn       { padding: 8px 10px; min-height: 44px; }
+
+  /* End screens */
+  .prison-screen,
+  .win-big-screen,
+  .win-small-screen,
+  .fara-screen    { padding: 20px 16px 28px; }
+  .prison-dossier { max-width: 100%; }
+}
+
+/* ---- Mobile: small phones (≤360px) ---- */
+@media (max-width: 360px) {
+  .hud-round      { font-size: 0.82rem; }
+  .hud-cash       { font-size: 0.9rem; }
+
+  .meter__label   { width: 26px; font-size: 0.74rem; }
+  .meter__value   { width: 38px; font-size: 0.72rem; }
+
+  .scenario-title { font-size: 1.1rem; }
+  .scenario-desc  { font-size: 0.82rem; }
+
+  .option-btn     { gap: 8px; padding: 10px 10px; }
   .option-text    { font-size: 0.82rem; }
-  .meters         { margin-top: 6px; }
-  .senator-center { margin-top: 8px; }
-  .scenario-card  { margin-top: 6px; }
-  .options        { margin-top: 6px; }
+}
+
+/* ---- Mobile: short / landscape phones (height ≤700px + width ≤480px) ---- */
+@media (max-height: 700px) and (max-width: 480px) {
+  .senator-center { width: min(140px, 36vw); margin-top: 4px; }
+  .meters         { margin-top: 4px; }
+  .scenario-card  { margin-top: 4px; }
+  .options        { margin-top: 4px; gap: 3px; }
+  .gold-bar-brick { width: 52px; height: 16px; font-size: 0.52rem; }
 }
 
 /* ---- HUD top bar ---- */
