@@ -220,8 +220,8 @@ body::before {
 
 /* ---- Mobile: standard phones (≤480px) ---- */
 @media (max-width: 480px) {
-  /* Layout */
-  .game-screen    { padding: 6px 10px 10px; }
+  /* Layout — fixed height on mobile so all 4 buttons always fit within viewport */
+  .game-screen    { height: 100svh; overflow: hidden; padding: 6px 10px 10px; }
 
   /* Spacing */
   .round-progress { margin-top: 3px; }
