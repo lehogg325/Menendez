@@ -255,6 +255,7 @@ export default function GameScreen({
         role="radiogroup"
         aria-label="Choose your action"
         aria-disabled={waiting}
+        style={waiting ? { pointerEvents: 'none' } : undefined}
       >
         {scenario.options.map((option, i) => (
           <button

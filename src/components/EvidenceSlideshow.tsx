@@ -12,8 +12,6 @@ interface Props {
 
 const SLIDE_MS = 3000
 
-const KB = ['kb-1', 'kb-2', 'kb-3', 'kb-4'] as const
-
 export default function EvidenceSlideshow({ slides, onComplete }: Props) {
   const [idx, setIdx] = useState(0)
   const doneRef = useRef(onComplete)
@@ -46,7 +44,7 @@ export default function EvidenceSlideshow({ slides, onComplete }: Props) {
               <img
                 src={slide.src}
                 alt={slide.label}
-                className={`photo-img ${KB[i % KB.length]}`}
+                className="photo-img"
                 draggable={false}
               />
             </div>
