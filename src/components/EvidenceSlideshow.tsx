@@ -11,61 +11,52 @@ interface Props {
 }
 
 const SLIDE_MS = 3000
-const FADE_MS  = 450
 
 const KB = ['kb-1', 'kb-2', 'kb-3', 'kb-4'] as const
 
 export default function EvidenceSlideshow({ slides, onComplete }: Props) {
-  const [idx,     setIdx]     = useState(0)
-  const [visible, setVisible] = useState(true)
+  const [idx, setIdx] = useState(0)
   const doneRef = useRef(onComplete)
   doneRef.current = onComplete
 
-  // After SLIDE_MS, fade out
+  // Advance to next slide after SLIDE_MS; photos stay in the pile
   useEffect(() => {
-    const t = setTimeout(() => setVisible(false), SLIDE_MS)
-    return () => clearTimeout(t)
-  }, [idx])
-
-  // After fade completes, advance or finish
-  useEffect(() => {
-    if (visible) return
     const t = setTimeout(() => {
       const next = idx + 1
       if (next >= slides.length) {
         doneRef.current()
       } else {
         setIdx(next)
-        setVisible(true)
       }
-    }, FADE_MS)
+    }, SLIDE_MS)
     return () => clearTimeout(t)
-  }, [visible, idx, slides.length])
-
-  const slide   = slides[idx]
-  const kbClass = KB[idx % KB.length]
+  }, [idx, slides.length])
 
   return (
     <div className="slideshow-screen" role="region" aria-label="Evidence slideshow">
 
-      <div className={`slideshow-wrap ${visible ? 'ss-on' : 'ss-off'}`}>
-        {/* key=idx forces img remount → CSS animation restarts */}
-        <img
-          key={idx}
-          src={slide.src}
-          alt={slide.label}
-          className={`slideshow-img ${kbClass}`}
-          draggable={false}
-        />
-        <div className="slideshow-vignette" aria-hidden="true" />
+      <div className="photo-pile">
+        {slides.slice(0, idx + 1).map((slide, i) => (
+          <div
+            key={i}
+            className={`photo-frame photo-rot-${i % 7}`}
+            style={{ zIndex: i + 1 }}
+          >
+            <div className="photo-img-wrap">
+              <img
+                src={slide.src}
+                alt={slide.label}
+                className={`photo-img ${KB[i % KB.length]}`}
+                draggable={false}
+              />
+            </div>
+            <div className="photo-caption">{slide.label}</div>
+          </div>
+        ))}
+      </div>
 
-        <div className="exhibit-label" aria-hidden="true">
-          {slide.label}
-        </div>
-
-        <div className="slide-counter" aria-hidden="true">
-          {idx + 1}&thinsp;/&thinsp;{slides.length}
-        </div>
+      <div className="slide-counter" aria-hidden="true">
+        {idx + 1}&thinsp;/&thinsp;{slides.length}
       </div>
 
       <button
@@ -75,6 +66,7 @@ export default function EvidenceSlideshow({ slides, onComplete }: Props) {
       >
         SKIP ▶▶
       </button>
+
     </div>
   )
 }
