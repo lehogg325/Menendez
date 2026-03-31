@@ -21,8 +21,8 @@ const SLIDES: Slide[] = [
   { src: img('Screenshot 2026-03-28 at 8.08.59 PM.png'), label: 'EXHIBIT C: $480,000 FOUND IN A CONGRESSIONAL JACKET'  },
   { src: img('Screenshot 2026-03-28 at 8.09.19 PM.png'), label: 'EXHIBIT D: 13 GOLD BARS — SWISS BANK CORPORATION'     },
   { src: img('Screenshot 2026-03-28 at 8.09.44 PM.png'), label: 'EXHIBIT E: WITH EGYPTIAN OFFICIAL-5'                  },
-  { src: img('6UN3AKXK7ZMAJNL5NXWNFBG3II.avif'),         label: 'EXHIBIT F: THE DEFENDANT'                              },
-  { src: img('images.jpeg'),                              label: 'EXHIBIT G: U.S. v. MENENDEZ — THE TRIAL'              },
+  { src: img('menendez_defendant.jpg'),                   label: 'EXHIBIT F: THE DEFENDANT'                              },
+  { src: img('menendez_trial.jpg'),                      label: 'EXHIBIT G: U.S. v. MENENDEZ — THE TRIAL'              },
 ]
 
 interface Props {
